@@ -29,7 +29,23 @@
 
 // HCLIN reference vexpress.c:
 // sysbus_create_simple("pl011", map[VE_UART0], pic[5]);
-#define VIC_BASE        0x2c002000
+//
+// a GIC is registered in vexpress.c
+//     * 0x2c000000 A15MPCore private memory region (GIC) *
+//    init_cpus(cpu_model, "a15mpcore_priv", 0x2c000000, pic);
+// in init_cpus, the GIC accept 64 gpio input and one output to ARM_IRQ
+// 
+// 			dev // GIC device
+//			busdev = SYS_BUS_DEVICE(dev);
+//		    for (n = 0; n < 64; n++) {
+//              pic[n] = qdev_get_gpio_in(dev, n);
+//    		}
+//			/* Connect the CPUs to the GIC */
+//    		for (n = 0; n < smp_cpus; n++) {
+//        		DeviceState *cpudev = DEVICE(qemu_get_cpu(n));
+//        		sysbus_connect_irq(busdev, n, qdev_get_gpio_in(cpudev, ARM_CPU_IRQ));
+//    		}
+#define VIC_BASE        0x2c000000
 #define PIC_TIMER01     2
 #define PIC_TIMER23     3
 #define PIC_UART0       5

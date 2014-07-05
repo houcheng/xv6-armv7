@@ -32,10 +32,12 @@ OBJS = \
 	trap.o\
 	vm.o \
 	\
-	device/picirq.o \
 	device/timer.o \
-	device/uart.o
+	device/uart.o \
+	device/gic.o
 
+#device/picirq.o \
+	
 KERN_OBJS = $(OBJS) entry.o
 kernel.elf: $(addprefix build/,$(KERN_OBJS)) kernel.ld build/initcode build/fs.img
 	cp -f build/initcode initcode

@@ -15,6 +15,7 @@ void swi_handler (struct trapframe *r)
 // trap routine
 void irq_handler (struct trapframe *r)
 {
+    
     // proc points to the current process. If the kernel is
     // running scheduler, proc is NULL.
     if (proc != NULL) {

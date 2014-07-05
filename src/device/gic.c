@@ -7,7 +7,6 @@
 
 
 static volatile uint* gic_base;
-// static volatile uint* gic_cpu_base;
 
 #define SGI_TYPE		1
 #define PPI_TYPE		2
@@ -50,68 +49,7 @@ static volatile uint* gic_base;
 
 #define GICD_REG(o)		(*(uint *)(((uint) gic_base) + 0x1000 + o))
 #define GICC_REG(o)		(*(uint *)(((uint) gic_base) + 0x2000 + o))
-/* #define GICD_REGOFF(o1, o2)	(*(uint *)(((uint) gic_base) + 0x1000 + o1 + o2)) */
 
-/* to supress warning message **/
-#define static 
-#if 0
-
-static void gd_spi_setmode(int spi, int is_edge) 
-{
-	int id = spi2id(spi);
-	int offset = (id*2)/32;
-	int bitpos = ((id*2)%32)+ 1;
-	uint val = GICD_REGOFF(GICD_ICFGR, offset);
-	if(is_edge)
-		val |= is_edge << bitpos;
-	else
-		val &= ~(1<< bitpos);
-	GICD_REG(GICD_ICFGR, offset) = val;
-}
-/*
- * set target to cpu0
- */
-static void gd_spi_target0(int spi)
-{
-	#warning empty
-	int id = spi2id(spi);
-}
-
-/*
- * set target to group0
- */
-static void gd_spi_target0(int spi)
-{
-	#warning empty
-	int id = spi2id(spi);
-}
-
-
-
-/*
- * get signaled interrupt and also ack it thru cpu interface
- * no handle sgi in this function
- */
-int get_ack() {
-	int id = GIC_REG(GICC_IAR) & 0x3FF; /* higher is cpu id of sgi */
-	if (id == 1023)
-		return 0;
-	return id;
-}
-/*
- * set eoi thru cpu interface, if sgi, the id should include cpuid
- */
-int set_eoi(int id)
-{
-	GIC_REG(GICC_EOIR) = id;
-}
-
-
-int int_enable(int id)
-{
-
-}
-#else
 /*  id is m
  *  offset n= m DIV 32
  *  bit    pos = m MOD 32;
@@ -157,7 +95,6 @@ static void gd_spi_enable(int spi)
 static void gd_spi_group0(int spi)
 {
 	return;
-
 }
 
 /* set target processor
@@ -172,6 +109,7 @@ static void gd_spi_target0(int spi)
 	rval |= tcpu << bitpos;
 	GICD_REG(GICD_ITARGET+ 4*offset) = rval;	
 }
+
 /* set cfg
  */
 static void gd_spi_setcfg(int spi, int is_edge)
@@ -186,8 +124,9 @@ static void gd_spi_setcfg(int spi, int is_edge)
 		rval |= 0x02 << bitpos;
 	GICD_REG(GICD_ICFG+ 4*offset) = rval;	
 }
+
 /*
- * TODO: process itype here
+ * TODO: process itype other than SPI
  */
 static void gic_dist_configure(int itype, int num)
 {
@@ -206,15 +145,21 @@ static void gic_dist_init()
 	cprintf("gic type: 0x%x\n", GICD_REG(GICD_TYPER));
 }
 
+/* HCLIN: the intc does not work until set the priority mask 
+ * for a intc
+ *   enable int pin, 
+ *   set pin trigger type, 
+ *   enable int global, 
+ *   set mask
+ *
+ */
 static void gic_cpu_init() 
 {
 	cprintf("gic cpuif type:0x%x\n", GICC_REG(GICC_IIDR));
-	GICC_REG(GICC_PMR) = 0x0f; /* priority value 0 to 0xe is supported */
 
+	GICC_REG(GICC_PMR) = 0x0f; /* priority value 0 to 0xe is supported */
 }
 
-
-#endif
 
 /* enable group 0 only
  */
@@ -226,7 +171,7 @@ static void gic_enable()
 
 /* disable group 0 only
  */
-static void gic_disable()
+void gic_disable()
 {
 	GICD_REG(GICD_CTLR) &= ~(uint)1;
 	GICD_REG(GICC_CTLR) &= ~(uint)1;
@@ -237,6 +182,42 @@ static void gic_configure(int itype, int num)
 {
 	gic_dist_configure(itype, num);
 }
+
+void gic_eoi(int intn)
+{
+	GICC_REG(GICC_EOIR) = spi2id(intn);
+}
+
+int gic_getack()
+{
+	return GICC_REG(GICC_IAR);
+}
+
+/* ISR code */
+#define NUM_INTSRC		32 // numbers of interrupt source supported
+
+static ISR isrs[NUM_INTSRC];
+
+static void default_isr (struct trapframe *tf, int n)
+{
+    cprintf ("unhandled interrupt: %d\n", n);
+}
+
+
+void pic_enable (int n, ISR isr)
+{
+	cprintf("pic enable:%d 0x%x\n", n, isr);
+	if(n < NUM_INTSRC) {
+		isrs[n] = isr;
+	}
+}
+
+void isr_init()
+{
+	int i;
+	for (i=0; i< NUM_INTSRC; i++)
+		isrs[i] = default_isr;
+}
 /*
  * This section init gic according to CORTEX A15 reference manual
  * 8.3.1 distributor register and 8.3.2 
@@ -246,34 +227,26 @@ void gic_init(void * base)
 	gic_base = base;
 	gic_dist_init();
 	gic_cpu_init();
+	isr_init();
 
 	gic_configure(SPI_TYPE, PIC_TIMER01);
 	gic_configure(SPI_TYPE, PIC_TIMER23);
 	gic_configure(SPI_TYPE, PIC_UART0);
+
 	gic_enable();
-}
-
-
-void pic_enable (int n, ISR isr)
-{
 
 }
 
-// dispatch the interrupt
+/*
+ * dispatch the interrupt
+ */
 void pic_dispatch (struct trapframe *tp)
 {
-	cprintf("pic dispatch\n");
-/*    uint intstatus;
-    int		i;
-
-    intstatus = vic_base[VIC_IRQSTATUS];
-
-    for (i = 0; i < NUM_INTSRC; i++) {
-        if (intstatus & (1<<i)) {
-            isrs[i](tp, i);
-        }
-    }
-
-    intstatus = vic_base[VIC_IRQSTATUS];  */
+	int intid, intn;
+	intid = gic_getack(); /* iack */
+	intn = intid - 32;
+	/* TODO: int disable here? **/
+	isrs[intn](tp, intn);
+	gic_eoi(intn);
 }
 

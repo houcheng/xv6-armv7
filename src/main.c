@@ -35,7 +35,10 @@ void kmain (void)
     kmem_init2(P2V(INIT_KERNMAP), P2V(PHYSTOP));
     
     trap_init ();				// vector table and stacks for models
-    pic_init (P2V(VIC_BASE));	// interrupt controller
+    cprintf("hello man this is HC kernel:%d 0x%x before pic_init\n", 0x5678, 0x5678);
+    /* pic_init (P2V(VIC_BASE));	*/// interrupt controller
+    gic_init(P2V(VIC_BASE));
+
     uart_enable_rx ();			// interrupt for uart
     consoleinit ();				// console
     pinit ();					// process (locks)
@@ -48,7 +51,7 @@ void kmain (void)
 
 
     sti ();
-
+    cprintf("hello man this is HC kernel:%d 0x%x\n", 0x5678, 0x5678);
     userinit();					// first user process
     scheduler();				// start running processes
 }
