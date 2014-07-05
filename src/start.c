@@ -181,8 +181,9 @@ void start (void)
         cprintf ("error: vector table overlaps kernel\n");
     }
     // V, P, len, is_mem
-    set_bootpgtbl(VEC_TBL, 0, 1 << PDE_SHIFT, 0); // V, P, SZ, ISMEM
-    set_bootpgtbl(KERNBASE+DEVBASE, DEVBASE, DEV_MEM_SZ, 1); // V, P, SZ, ISMEM
+    set_bootpgtbl(VEC_TBL, 0, 1 << PDE_SHIFT, 0); // V, P, SZ, ISDEV
+    set_bootpgtbl(KERNBASE+DEVBASE1, DEVBASE1, DEV_MEM_SZ, 1); // V, P, SZ, ISDEV
+    set_bootpgtbl(KERNBASE+DEVBASE2, DEVBASE2, DEV_MEM_SZ, 1); // V, P, SZ, ISDEV
 
     load_pgtlb (kernel_pgtbl, user_pgtbl);
     jump_stack ();

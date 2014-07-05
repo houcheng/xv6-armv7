@@ -12,8 +12,9 @@
 #define PHYSTOP         (0x08000000 + PHY_START)
 #define BSP_MEMREMAP    0x04000000
 
-#define DEVBASE         0x10000000
-#define DEV_MEM_SZ      0x08000000
+#define DEVBASE1        0x1c000000
+#define DEVBASE2        0x2c000000
+#define DEV_MEM_SZ      0x01000000
 #define VEC_TBL         0xFFFF0000
 
 
@@ -22,11 +23,11 @@
 #define UART0           0x1c090000
 #define UART_CLK        24000000    // Clock rate for UART
 
-#define TIMER0          0x101E2000
-#define TIMER1          0x101E2020
+#define TIMER0          0x1c110000
+#define TIMER1          0x1c120000
 #define CLK_HZ          1000000     // the clock is 1MHZ
 
-#define VIC_BASE        0x10140000
+#define VIC_BASE        0x2c002000
 #define PIC_TIMER01     4
 #define PIC_TIMER23     5
 #define PIC_UART0       12
