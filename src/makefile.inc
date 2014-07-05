@@ -1,6 +1,6 @@
 # Cross-compiling (e.g., on Mac OS X, install arm-none-eabi-gcc with MacPorts)
 CROSSCOMPILE := arm-none-eabi-
-
+#CROSSCOMPILE := arm-none-linux-gnueabi-
 CC = $(CROSSCOMPILE)gcc
 AS = $(CROSSCOMPILE)as
 LD = $(CROSSCOMPILE)ld
