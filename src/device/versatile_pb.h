@@ -27,10 +27,12 @@
 #define TIMER1          0x1c120000
 #define CLK_HZ          1000000     // the clock is 1MHZ
 
+// HCLIN reference vexpress.c:
+// sysbus_create_simple("pl011", map[VE_UART0], pic[5]);
 #define VIC_BASE        0x2c002000
-#define PIC_TIMER01     4
-#define PIC_TIMER23     5
-#define PIC_UART0       12
+#define PIC_TIMER01     2
+#define PIC_TIMER23     3
+#define PIC_UART0       5
 #define PIC_GRAPHIC     19
 
 #endif
