@@ -11,6 +11,7 @@ _start:
     LDR     r1, =edata_entry
     LDR     r2, =end_entry
     MOV     r3, #0x00
+    # MOV   r3, #0xab  # paint tags on stack for identify problems in qemu
 
 1:
     CMP     r1, r2

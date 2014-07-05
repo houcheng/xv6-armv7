@@ -170,18 +170,19 @@ void start (void)
 
     // double map the low memory, required to enable paging
     // we do not map all the physical memory
-    set_bootpgtbl(0, 0, INIT_KERNMAP, 0);
-    set_bootpgtbl(KERNBASE, 0, INIT_KERNMAP, 0);
+    set_bootpgtbl(PHY_START, PHY_START, INIT_KERN_SZ, 0);
+    set_bootpgtbl(KERNBASE+PHY_START, PHY_START, INIT_KERN_SZ, 0);
 
     // vector table is in the middle of first 1MB (0xF000)
-    vectbl = P2V_WO (VEC_TBL & PDE_MASK);
+    vectbl = P2V_WO ((VEC_TBL & PDE_MASK) + PHY_START);
 
     if (vectbl <= (uint)&end) {
+        _puts("error: vector table overlap and cprintf() is 0x00000\n");
         cprintf ("error: vector table overlaps kernel\n");
     }
-
-    set_bootpgtbl(VEC_TBL, 0, 1 << PDE_SHIFT, 0);
-    set_bootpgtbl(KERNBASE+DEVBASE, DEVBASE, DEV_MEM_SZ, 1);
+    // V, P, len, is_mem
+    set_bootpgtbl(VEC_TBL, 0, 1 << PDE_SHIFT, 0); // V, P, SZ, ISMEM
+    set_bootpgtbl(KERNBASE+DEVBASE, DEVBASE, DEV_MEM_SZ, 1); // V, P, SZ, ISMEM
 
     load_pgtlb (kernel_pgtbl, user_pgtbl);
     jump_stack ();

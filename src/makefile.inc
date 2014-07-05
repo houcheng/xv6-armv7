@@ -1,13 +1,14 @@
 # Cross-compiling (e.g., on Mac OS X, install arm-none-eabi-gcc with MacPorts)
 CROSSCOMPILE := arm-none-eabi-
-#CROSSCOMPILE := arm-none-linux-gnueabi-
+# try linux eabi
+# CROSSCOMPILE := arm-linux-gnueabi-
 CC = $(CROSSCOMPILE)gcc
 AS = $(CROSSCOMPILE)as
 LD = $(CROSSCOMPILE)ld
 OBJCOPY = $(CROSSCOMPILE)objcopy
 OBJDUMP = $(CROSSCOMPILE)objdump
 
-CFLAGS = -march=armv6 -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Werror -I.
+CFLAGS = -march=armv7-a -mtune=cortex-a15 -fno-pic -static -fno-builtin -fno-strict-aliasing -Wall -Werror -I.
 LDFLAGS = -L.
 ASFLAGS = -march=armv6 
 

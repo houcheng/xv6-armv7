@@ -9,7 +9,7 @@
 // but we assume it has 128MB instead. During boot, the lower
 // 64MB memory is mapped to the flash, needs to be remapped
 // the the SDRAM. We skip this for QEMU
-#define PHYSTOP         0x08000000
+#define PHYSTOP         (0x08000000 + PHY_START)
 #define BSP_MEMREMAP    0x04000000
 
 #define DEVBASE         0x10000000
@@ -19,7 +19,7 @@
 
 #define STACK_FILL      0xdeadbeef
 
-#define UART0           0x101f1000
+#define UART0           0x1c090000
 #define UART_CLK        24000000    // Clock rate for UART
 
 #define TIMER0          0x101E2000
