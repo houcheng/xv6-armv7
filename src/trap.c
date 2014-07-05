@@ -43,7 +43,7 @@ void und_handler (struct trapframe *r)
 void dabort_handler (struct trapframe *r)
 {
     uint dfs, fa;
-
+    extern void show_callstk (char *s);
     cli();
 
     // read data fault status register
@@ -56,6 +56,7 @@ void dabort_handler (struct trapframe *r)
              r->pc, fa, dfs);
     
     dump_trapframe (r);
+    show_callstk("Stack dump for data exception.");
 }
 
 // trap routine

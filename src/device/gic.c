@@ -142,7 +142,7 @@ static void gic_dist_configure(int itype, int num)
  */
 static void gic_dist_init() 
 {
-	cprintf("gic type: 0x%x\n", GICD_REG(GICD_TYPER));
+	/* cprintf("Found gic type: 0x%x\n", GICD_REG(GICD_TYPER)); here is 0x4 **/
 }
 
 /* HCLIN: the intc does not work until set the priority mask 
@@ -155,8 +155,7 @@ static void gic_dist_init()
  */
 static void gic_cpu_init() 
 {
-	cprintf("gic cpuif type:0x%x\n", GICC_REG(GICC_IIDR));
-
+	/* cprintf("gic cpuif type:0x%x\n", GICC_REG(GICC_IIDR)); no simulate in qemu */
 	GICC_REG(GICC_PMR) = 0x0f; /* priority value 0 to 0xe is supported */
 }
 
@@ -206,7 +205,6 @@ static void default_isr (struct trapframe *tf, int n)
 
 void pic_enable (int n, ISR isr)
 {
-	cprintf("pic enable:%d 0x%x\n", n, isr);
 	if(n < NUM_INTSRC) {
 		isrs[n] = isr;
 	}
